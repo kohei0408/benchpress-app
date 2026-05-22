@@ -13,6 +13,8 @@ interface SessionStore {
   sessions: WorkoutSession[];
   draft: SessionDraft | null;
   profile: UserProfile;
+  setSessions: (sessions: WorkoutSession[]) => void;
+  addSession: (session: WorkoutSession) => void;
   startDraft: (setType: SetType) => void;
   updateDraftSet: (setNumber: number, patch: Partial<Pick<SetRecord, "weight" | "reps" | "rpe">>) => void;
   nextSet: () => void;
@@ -20,45 +22,17 @@ interface SessionStore {
   updateProfile: (profile: Partial<UserProfile>) => void;
 }
 
-const seedSessions: WorkoutSession[] = [
-  {
-    id: "seed-4",
-    date: new Date(Date.now() - 21 * 86400000).toISOString(),
-    setType: "straight",
-    sets: defaultSetsForType("straight", 72.5),
-    estimated1RM: 84.6,
-  },
-  {
-    id: "seed-3",
-    date: new Date(Date.now() - 14 * 86400000).toISOString(),
-    setType: "five-by-five",
-    sets: defaultSetsForType("five-by-five", 75),
-    estimated1RM: 87.5,
-  },
-  {
-    id: "seed-2",
-    date: new Date(Date.now() - 7 * 86400000).toISOString(),
-    setType: "topset-backoff",
-    sets: defaultSetsForType("topset-backoff", 75),
-    estimated1RM: 88,
-  },
-  {
-    id: "seed-1",
-    date: new Date(Date.now() - 2 * 86400000).toISOString(),
-    setType: "straight",
-    sets: defaultSetsForType("straight", 77.5),
-    estimated1RM: 90.4,
-  },
-];
-
 export const useSessionStore = create<SessionStore>((set, get) => ({
-  sessions: seedSessions,
+  sessions: [],
   draft: null,
   profile: {
     targetWeight: 100,
     barWeight: 20,
     oneRmFormula: "epley",
   },
+  setSessions: (sessions) => set({ sessions }),
+  addSession: (session) =>
+    set((state) => ({ sessions: [session, ...state.sessions] })),
   startDraft: (setType) => {
     const latestSameType = get().sessions.find((session) => session.setType === setType);
     const latestBest = get().sessions[0]?.sets[0]?.weight ?? 75;
@@ -111,7 +85,7 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
       estimated1RM: bestEstimatedOneRm(draft.sets, formula),
       notes: `volume:${totalVolume(draft.sets)}`,
     };
-    set({ sessions: [session, ...get().sessions], draft: null });
+    set({ draft: null });
     return session;
   },
   updateProfile: (profile) => set({ profile: { ...get().profile, ...profile } }),

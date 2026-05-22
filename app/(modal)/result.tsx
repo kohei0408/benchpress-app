@@ -1,13 +1,37 @@
 import { router } from "expo-router";
+import { useEffect, useState } from "react";
 import { SafeAreaView, Text, TouchableOpacity, View } from "react-native";
 import { SET_TYPE_LABELS } from "@/constants/setTypes";
 import { totalVolume } from "@/constants/formulas";
+import { useDb } from "@/contexts/DbContext";
+import { saveWorkoutSession } from "@/db/queries";
 import { useSessionStore } from "@/stores/sessionStore";
+import type { WorkoutSession } from "@/types";
 
 export default function ResultScreen() {
+  const db = useDb();
+  const finishDraft = useSessionStore((state) => state.finishDraft);
+  const addSession = useSessionStore((state) => state.addSession);
   const sessions = useSessionStore((state) => state.sessions);
-  const latest = sessions[0];
-  const previous = sessions[1];
+  const [session, setSession] = useState<WorkoutSession | null>(null);
+
+  useEffect(() => {
+    const finished = finishDraft();
+    if (finished) {
+      addSession(finished);
+      setSession(finished);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!db || !session) {
+      return;
+    }
+    saveWorkoutSession(db, session).catch((err) => console.error("DB save error:", err));
+  }, [db, session]);
+
+  const latest = session ?? sessions[0];
+  const previous = sessions.find((item) => item.id !== latest?.id);
 
   if (!latest) {
     return (

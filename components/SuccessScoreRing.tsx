@@ -1,13 +1,5 @@
-import { useEffect } from "react";
 import { Text, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
-import Animated, {
-  useAnimatedProps,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
-
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 interface SuccessScoreRingProps {
   score: number;
@@ -20,15 +12,8 @@ export function SuccessScoreRing({ score, targetWeight, estimatedOneRm }: Succes
   const stroke = 16;
   const size = 210;
   const circumference = 2 * Math.PI * radius;
-  const progress = useSharedValue(0);
-
-  useEffect(() => {
-    progress.value = withTiming(score / 100, { duration: 800 });
-  }, [progress, score]);
-
-  const animatedProps = useAnimatedProps(() => ({
-    strokeDashoffset: circumference * (1 - progress.value),
-  }));
+  const progress = Math.max(0, Math.min(1, score / 100));
+  const strokeDashoffset = circumference * (1 - progress);
 
   return (
     <View className="items-center justify-center rounded-lg bg-ink px-5 py-6">
@@ -42,8 +27,7 @@ export function SuccessScoreRing({ score, targetWeight, estimatedOneRm }: Succes
             strokeWidth={stroke}
             fill="transparent"
           />
-          <AnimatedCircle
-            animatedProps={animatedProps}
+          <Circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
@@ -52,6 +36,7 @@ export function SuccessScoreRing({ score, targetWeight, estimatedOneRm }: Succes
             fill="transparent"
             strokeLinecap="round"
             strokeDasharray={`${circumference} ${circumference}`}
+            strokeDashoffset={strokeDashoffset}
             rotation="-90"
             origin={`${size / 2}, ${size / 2}`}
           />

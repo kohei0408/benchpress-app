@@ -2,7 +2,9 @@ import { useMemo } from "react";
 import { totalVolume } from "@/constants/formulas";
 import type { FatigueLog, SuccessScoreResult, WorkoutSession } from "@/types";
 
-function clamp(value: number) {
+const BASE_SCORE = 50;
+
+function clampScore(value: number) {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
@@ -12,30 +14,67 @@ export function useSuccessScore(
   stagnationWeeks: number,
 ): SuccessScoreResult {
   return useMemo(() => {
-    const ordered = [...sessions].sort((a, b) => a.date.localeCompare(b.date));
-    const first = ordered[0]?.estimated1RM ?? 0;
-    const latest = ordered[ordered.length - 1]?.estimated1RM ?? first;
-    const growthRate = first > 0 ? (latest - first) / first : 0;
-    const oneRmImpact = growthRate > 0.03 ? 30 : growthRate > 0 ? 18 : -20;
+    if (sessions.length === 0) {
+      return { score: BASE_SCORE, factors: [] };
+    }
 
-    const recentVolume = ordered.slice(-2).reduce((sum, session) => sum + totalVolume(session.sets), 0);
-    const previousVolume = ordered
-      .slice(Math.max(0, ordered.length - 4), Math.max(0, ordered.length - 2))
-      .reduce((sum, session) => sum + totalVolume(session.sets), 0);
-    const volumeImpact = recentVolume >= previousVolume ? 20 : -8;
-    const fatigueImpact = fatigue.fatigueScore <= 35 ? 25 : fatigue.fatigueScore >= 70 ? -25 : 8;
-    const sleepImpact = fatigue.sleepHours >= 7 ? 15 : -12;
-    const stagnationImpact = stagnationWeeks === 0 ? 10 : -Math.min(20, stagnationWeeks * 10);
+    const factors: SuccessScoreResult["factors"] = [];
+    let delta = 0;
 
-    const factors = [
-      { label: "1RM推移", impact: oneRmImpact },
-      { label: "週間ボリューム", impact: volumeImpact },
-      { label: "疲労", impact: fatigueImpact },
-      { label: "睡眠", impact: sleepImpact },
-      { label: "停滞", impact: stagnationImpact },
-    ];
-    const raw = 50 + factors.reduce((sum, item) => sum + item.impact, 0) / 2;
+    const recentFour = sessions.slice(0, 4);
+    let oneRmImpact = 0;
+    if (recentFour.length >= 2) {
+      const newest = recentFour[0].estimated1RM;
+      const oldest = recentFour[recentFour.length - 1].estimated1RM;
+      if (newest > oldest) {
+        oneRmImpact = 20;
+      } else if (newest < oldest) {
+        oneRmImpact = -15;
+      }
+    }
+    factors.push({ label: "1RM伸び率", impact: oneRmImpact });
+    delta += oneRmImpact;
 
-    return { score: clamp(raw), factors };
+    let volumeImpact = 0;
+    if (sessions.length >= 2) {
+      const latestVolume = totalVolume(sessions[0].sets);
+      const previousVolume = totalVolume(sessions[1].sets);
+      if (latestVolume > previousVolume) {
+        volumeImpact = 10;
+      } else if (latestVolume < previousVolume) {
+        volumeImpact = -10;
+      }
+    }
+    factors.push({ label: "ボリューム", impact: volumeImpact });
+    delta += volumeImpact;
+
+    let fatigueImpact = 0;
+    if (fatigue.fatigueScore <= 30) {
+      fatigueImpact = 15;
+    } else if (fatigue.fatigueScore >= 61) {
+      fatigueImpact = -15;
+    }
+    factors.push({ label: "疲労", impact: fatigueImpact });
+    delta += fatigueImpact;
+
+    let sleepImpact = 0;
+    if (fatigue.sleepHours >= 7) {
+      sleepImpact = 10;
+    } else if (fatigue.sleepHours < 5) {
+      sleepImpact = -10;
+    }
+    factors.push({ label: "睡眠", impact: sleepImpact });
+    delta += sleepImpact;
+
+    let stagnationImpact = 0;
+    if (stagnationWeeks >= 3) {
+      stagnationImpact = -20;
+    } else if (stagnationWeeks === 2) {
+      stagnationImpact = -10;
+    }
+    factors.push({ label: "停滞", impact: stagnationImpact });
+    delta += stagnationImpact;
+
+    return { score: clampScore(BASE_SCORE + delta), factors };
   }, [fatigue, sessions, stagnationWeeks]);
 }

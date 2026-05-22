@@ -1,5 +1,7 @@
 import { Link } from "expo-router";
-import { FlatList, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { screenFlex, scrollContent } from "@/constants/layout";
 import { AIRecommendCard } from "@/components/AIRecommendCard";
 import { StagnationBadge } from "@/components/StagnationBadge";
 import { SuccessScoreRing } from "@/components/SuccessScoreRing";
@@ -39,8 +41,8 @@ export default function HomeScreen() {
   const ai = useAIRecommendation(sessions, fatigue);
 
   return (
-    <SafeAreaView className="flex-1 bg-panel">
-      <ScrollView className="flex-1" contentContainerClassName="px-5 pb-8 pt-4">
+    <SafeAreaView className="flex-1 bg-panel" style={screenFlex} edges={["top"]}>
+      <ScrollView style={screenFlex} contentContainerStyle={scrollContent}>
         <View className="mb-4">
           <Text className="text-3xl font-black text-ink">BenchMax</Text>
           <Text className="mt-1 text-sm font-semibold text-steel">ベンチプレス更新に全振り</Text>
@@ -88,12 +90,9 @@ export default function HomeScreen() {
 
         <View className="mt-6">
           <Text className="mb-3 text-lg font-black text-ink">直近5件</Text>
-          <FlatList
-            data={sessions.slice(0, 5)}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <HistoryRow item={item} />}
-            scrollEnabled={false}
-          />
+          {sessions.slice(0, 5).map((item) => (
+            <HistoryRow item={item} key={item.id} />
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>

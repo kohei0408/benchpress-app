@@ -11,8 +11,6 @@ export default function RecordingScreen() {
   const sessions = useSessionStore((state) => state.sessions);
   const updateDraftSet = useSessionStore((state) => state.updateDraftSet);
   const nextSet = useSessionStore((state) => state.nextSet);
-  const finishDraft = useSessionStore((state) => state.finishDraft);
-
   if (!draft) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-panel px-5">
@@ -34,7 +32,6 @@ export default function RecordingScreen() {
   const isLast = draft.currentIndex === draft.sets.length - 1;
 
   const complete = () => {
-    finishDraft();
     router.replace("/(modal)/result");
   };
 

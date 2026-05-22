@@ -1,19 +1,47 @@
-import { SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { screenFlex, scrollContent } from "@/constants/layout";
 import { MuscleMap } from "@/components/MuscleMap";
+import { useDb } from "@/contexts/DbContext";
 import { useFatigueStore } from "@/stores/fatigueStore";
 import { useSessionStore } from "@/stores/sessionStore";
-import type { OneRmFormula } from "@/types";
+import type { FatigueLog, MuscleGroup, OneRmFormula } from "@/types";
+
+function calcFatigueScore(sleepHours: number, soreMuscles: MuscleGroup[]): number {
+  const sleepPenalty = sleepHours < 7 ? 30 : 0;
+  const musclePenalty = Math.min(70, soreMuscles.length * 15);
+  return Math.max(0, Math.min(100, sleepPenalty + musclePenalty));
+}
 
 export default function ProfileScreen() {
+  const db = useDb();
   const profile = useSessionStore((state) => state.profile);
   const updateProfile = useSessionStore((state) => state.updateProfile);
   const fatigue = useFatigueStore((state) => state.latest);
   const setSleepHours = useFatigueStore((state) => state.setSleepHours);
   const toggleMuscle = useFatigueStore((state) => state.toggleMuscle);
+  const saveLog = useFatigueStore((state) => state.saveLog);
+
+  const handleSave = async () => {
+    if (!db) {
+      return;
+    }
+    const log: FatigueLog = {
+      date: new Date().toISOString().split("T")[0],
+      sleepHours: fatigue.sleepHours,
+      soreMuscles: fatigue.soreMuscles,
+      fatigueScore: calcFatigueScore(fatigue.sleepHours, fatigue.soreMuscles),
+    };
+    try {
+      await saveLog(db, log);
+    } catch (err) {
+      console.error("Fatigue log save error:", err);
+    }
+  };
 
   return (
-    <SafeAreaView className="flex-1 bg-panel">
-      <ScrollView className="flex-1" contentContainerClassName="px-5 pb-8 pt-4">
+    <SafeAreaView className="flex-1 bg-panel" style={screenFlex} edges={["top"]}>
+      <ScrollView style={screenFlex} contentContainerStyle={scrollContent}>
         <Text className="text-3xl font-black text-ink">プロフィール</Text>
         <View className="mt-5 rounded-lg bg-white p-4">
           <Text className="text-sm font-black text-ink">目標重量</Text>
@@ -91,6 +119,14 @@ export default function ProfileScreen() {
         <View className="mt-4">
           <MuscleMap onToggle={toggleMuscle} selected={fatigue.soreMuscles} />
         </View>
+
+        <TouchableOpacity
+          accessibilityRole="button"
+          className="mt-5 h-14 items-center justify-center rounded-lg bg-lift"
+          onPress={() => void handleSave()}
+        >
+          <Text className="text-base font-black text-white">疲労ログを保存</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );

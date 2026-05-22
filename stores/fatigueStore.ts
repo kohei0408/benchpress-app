@@ -1,8 +1,12 @@
 import { create } from "zustand";
+import * as SQLite from "expo-sqlite";
+import { saveFatigueLog } from "@/db/queries";
 import type { FatigueLog, MuscleGroup } from "@/types";
 
 interface FatigueStore {
   latest: FatigueLog;
+  setLatest: (latest: FatigueLog) => void;
+  saveLog: (db: SQLite.SQLiteDatabase, log: FatigueLog) => Promise<void>;
   setSleepHours: (sleepHours: number) => void;
   toggleMuscle: (muscle: MuscleGroup) => void;
 }
@@ -19,6 +23,16 @@ export const useFatigueStore = create<FatigueStore>((set, get) => ({
     sleepHours: 7,
     soreMuscles: ["pectoralis"],
     fatigueScore: 32,
+  },
+  setLatest: (latest) => set({ latest }),
+  saveLog: async (db, log) => {
+    try {
+      await saveFatigueLog(db, log);
+      set({ latest: log });
+    } catch (err) {
+      console.error("Fatigue log save error:", err);
+      throw err;
+    }
   },
   setSleepHours: (sleepHours) => {
     const latest = get().latest;

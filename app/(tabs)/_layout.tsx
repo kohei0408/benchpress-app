@@ -10,6 +10,7 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        sceneStyle: { flex: 1, backgroundColor: "#f6f7f9" },
         tabBarActiveTintColor: "#e23d28",
         tabBarInactiveTintColor: "#6b7280",
         tabBarStyle: {

@@ -1,4 +1,6 @@
-import { SafeAreaView, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { screenFlex, scrollContent } from "@/constants/layout";
 import { BarChart, LineChart } from "react-native-gifted-charts";
 import { totalVolume } from "@/constants/formulas";
 import { useStagnationDetect } from "@/hooks/useStagnationDetect";
@@ -19,11 +21,12 @@ export default function AnalysisScreen() {
     label: new Date(session.date).toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" }),
     frontColor: "#121417",
   }));
-  const best = Math.max(...ordered.map((session) => session.estimated1RM));
+  const best =
+    ordered.length > 0 ? Math.max(...ordered.map((session) => session.estimated1RM)) : 0;
 
   return (
-    <SafeAreaView className="flex-1 bg-panel">
-      <ScrollView className="flex-1" contentContainerClassName="px-5 pb-8 pt-4">
+    <SafeAreaView className="flex-1 bg-panel" style={screenFlex} edges={["top"]}>
+      <ScrollView style={screenFlex} contentContainerStyle={scrollContent}>
         <Text className="text-3xl font-black text-ink">グラフ分析</Text>
         <View className="mt-4 flex-row gap-2">
           {FILTERS.map((filter) => (
