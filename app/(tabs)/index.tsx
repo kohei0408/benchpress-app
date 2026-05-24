@@ -1,12 +1,12 @@
 import { Link } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { screenFlex, scrollContent } from "@/constants/layout";
 import { AIRecommendCard } from "@/components/AIRecommendCard";
 import { StagnationBadge } from "@/components/StagnationBadge";
 import { SuccessScoreRing } from "@/components/SuccessScoreRing";
-import { SET_TYPE_LABELS } from "@/constants/setTypes";
 import { totalVolume } from "@/constants/formulas";
+import { screenFlex, scrollContent } from "@/constants/layout";
+import { SET_TYPE_LABELS } from "@/constants/setTypes";
 import { useAIRecommendation } from "@/hooks/useAIRecommendation";
 import { useStagnationDetect } from "@/hooks/useStagnationDetect";
 import { useSuccessScore } from "@/hooks/useSuccessScore";
@@ -16,9 +16,9 @@ import type { WorkoutSession } from "@/types";
 
 function HistoryRow({ item }: { item: WorkoutSession }) {
   return (
-    <TouchableOpacity accessibilityRole="button" className="mb-2 rounded-lg bg-white px-4 py-3">
+    <TouchableOpacity accessibilityRole="button" className="mb-2 min-h-16 rounded-lg bg-white px-4 py-3">
       <View className="flex-row items-center justify-between">
-        <View>
+        <View className="mr-3 flex-1">
           <Text className="text-sm font-black text-ink">{SET_TYPE_LABELS[item.setType]}</Text>
           <Text className="mt-1 text-xs text-steel">{new Date(item.date).toLocaleDateString("ja-JP")}</Text>
         </View>
@@ -54,12 +54,12 @@ export default function HomeScreen() {
           targetWeight={profile.targetWeight}
         />
 
-        <View className="mt-4 flex-row gap-2">
-          <View className="flex-1 rounded-lg bg-white p-3">
+        <View className="mt-4 flex-row">
+          <View className="mr-1 flex-1 rounded-lg bg-white p-3">
             <Text className="text-xs font-bold text-steel">睡眠</Text>
             <Text className="mt-1 text-xl font-black text-ink">{fatigue.sleepHours.toFixed(1)} h</Text>
           </View>
-          <View className="flex-1 rounded-lg bg-white p-3">
+          <View className="ml-1 flex-1 rounded-lg bg-white p-3">
             <Text className="text-xs font-bold text-steel">疲労</Text>
             <Text className="mt-1 text-xl font-black text-ink">{fatigue.fatigueScore}/100</Text>
           </View>

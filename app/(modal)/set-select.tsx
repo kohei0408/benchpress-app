@@ -1,5 +1,7 @@
 import { router } from "expo-router";
-import { SafeAreaView, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { modalScrollContent, screenFlex } from "@/constants/layout";
 import { SET_TYPE_LABELS, SET_TYPE_OPTIONS } from "@/constants/setTypes";
 import { useSessionStore } from "@/stores/sessionStore";
 import type { SetType } from "@/types";
@@ -13,19 +15,24 @@ export default function SetSelectScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-panel">
-      <View className="flex-1 px-5 pt-4">
-        <View className="flex-row items-center justify-between">
-          <Text className="text-3xl font-black text-ink">セット構成</Text>
-          <TouchableOpacity accessibilityRole="button" onPress={() => router.back()}>
-            <Text className="text-base font-black text-steel">閉じる</Text>
+    <SafeAreaView className="flex-1 bg-panel" edges={["top", "bottom"]}>
+      <ScrollView style={screenFlex} contentContainerStyle={modalScrollContent}>
+        <View className="mb-5 flex-row items-center justify-between">
+          <TouchableOpacity
+            accessibilityRole="button"
+            className="min-h-11 min-w-20 items-center justify-center rounded-lg bg-white px-4"
+            onPress={() => router.back()}
+          >
+            <Text className="text-base font-black text-ink">戻る</Text>
           </TouchableOpacity>
+          <Text className="flex-1 text-right text-2xl font-black text-ink">セット構成</Text>
         </View>
-        <View className="mt-6 gap-3">
+
+        <View>
           {SET_TYPE_OPTIONS.map((setType, index) => (
             <TouchableOpacity
               accessibilityRole="button"
-              className="rounded-lg bg-white p-5"
+              className="mb-3 min-h-[76px] rounded-lg bg-white p-4"
               key={setType}
               onPress={() => select(setType)}
             >
@@ -34,7 +41,7 @@ export default function SetSelectScreen() {
             </TouchableOpacity>
           ))}
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

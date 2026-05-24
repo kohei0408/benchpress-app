@@ -16,6 +16,7 @@ interface SessionStore {
   setSessions: (sessions: WorkoutSession[]) => void;
   addSession: (session: WorkoutSession) => void;
   startDraft: (setType: SetType) => void;
+  addDraftSet: () => void;
   updateDraftSet: (setNumber: number, patch: Partial<Pick<SetRecord, "weight" | "reps" | "rpe">>) => void;
   nextSet: () => void;
   finishDraft: () => WorkoutSession | null;
@@ -42,6 +43,26 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
         setType,
         sets: sets.map((item) => ({ ...item })),
         currentIndex: 0,
+      },
+    });
+  },
+  addDraftSet: () => {
+    const draft = get().draft;
+    if (!draft) {
+      return;
+    }
+    const previous = draft.sets[draft.sets.length - 1];
+    const nextSet: SetRecord = {
+      setNumber: draft.sets.length + 1,
+      weight: previous?.weight ?? 75,
+      reps: previous?.reps ?? 5,
+      rpe: previous?.rpe,
+    };
+    set({
+      draft: {
+        ...draft,
+        sets: [...draft.sets, nextSet],
+        currentIndex: draft.sets.length,
       },
     });
   },

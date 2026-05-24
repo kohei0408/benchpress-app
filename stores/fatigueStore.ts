@@ -26,13 +26,8 @@ export const useFatigueStore = create<FatigueStore>((set, get) => ({
   },
   setLatest: (latest) => set({ latest }),
   saveLog: async (db, log) => {
-    try {
-      await saveFatigueLog(db, log);
-      set({ latest: log });
-    } catch (err) {
-      console.error("Fatigue log save error:", err);
-      throw err;
-    }
+    await saveFatigueLog(db, log);
+    set({ latest: log });
   },
   setSleepHours: (sleepHours) => {
     const latest = get().latest;

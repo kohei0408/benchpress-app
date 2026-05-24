@@ -1,8 +1,10 @@
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { SafeAreaView, Text, TouchableOpacity, View } from "react-native";
-import { SET_TYPE_LABELS } from "@/constants/setTypes";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { totalVolume } from "@/constants/formulas";
+import { modalScrollContent, screenFlex } from "@/constants/layout";
+import { SET_TYPE_LABELS } from "@/constants/setTypes";
 import { useDb } from "@/contexts/DbContext";
 import { saveWorkoutSession } from "@/db/queries";
 import { useSessionStore } from "@/stores/sessionStore";
@@ -21,13 +23,13 @@ export default function ResultScreen() {
       addSession(finished);
       setSession(finished);
     }
-  }, []);
+  }, [addSession, finishDraft]);
 
   useEffect(() => {
     if (!db || !session) {
       return;
     }
-    saveWorkoutSession(db, session).catch((err) => console.error("DB save error:", err));
+    void saveWorkoutSession(db, session);
   }, [db, session]);
 
   const latest = session ?? sessions[0];
@@ -35,8 +37,15 @@ export default function ResultScreen() {
 
   if (!latest) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-panel px-5">
-        <Text className="text-lg font-black text-ink">表示できる記録がありません</Text>
+      <SafeAreaView className="flex-1 items-center justify-center bg-panel px-5" edges={["top", "bottom"]}>
+        <Text className="text-center text-lg font-black text-ink">表示できる記録がありません</Text>
+        <TouchableOpacity
+          accessibilityRole="button"
+          className="mt-5 min-h-12 rounded-lg bg-ink px-5 py-3"
+          onPress={() => router.replace("/(tabs)")}
+        >
+          <Text className="font-black text-white">ホームへ戻る</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     );
   }
@@ -47,10 +56,20 @@ export default function ResultScreen() {
   const challenge = Math.ceil((latest.estimated1RM * 0.97) / 2.5) * 2.5;
 
   return (
-    <SafeAreaView className="flex-1 bg-panel">
-      <View className="flex-1 px-5 pt-4">
-        <Text className="text-3xl font-black text-ink">リザルト</Text>
-        <View className="mt-6 rounded-lg bg-ink p-6">
+    <SafeAreaView className="flex-1 bg-panel" edges={["top", "bottom"]}>
+      <ScrollView style={screenFlex} contentContainerStyle={modalScrollContent}>
+        <View className="mb-5 flex-row items-center justify-between">
+          <TouchableOpacity
+            accessibilityRole="button"
+            className="min-h-11 min-w-20 items-center justify-center rounded-lg bg-white px-4"
+            onPress={() => router.back()}
+          >
+            <Text className="text-base font-black text-ink">戻る</Text>
+          </TouchableOpacity>
+          <Text className="flex-1 text-right text-3xl font-black text-ink">リザルト</Text>
+        </View>
+
+        <View className="rounded-lg bg-ink p-6">
           <Text className="text-sm font-bold text-white/60">{SET_TYPE_LABELS[latest.setType]}</Text>
           <Text className="mt-2 text-5xl font-black text-white">{latest.estimated1RM.toFixed(1)} kg</Text>
           <Text className="mt-2 text-sm font-semibold text-white/70">推定 1RM</Text>
@@ -87,12 +106,12 @@ export default function ResultScreen() {
 
         <TouchableOpacity
           accessibilityRole="button"
-          className="mt-auto mb-6 h-16 items-center justify-center rounded-lg bg-lift"
+          className="mt-5 h-16 items-center justify-center rounded-lg bg-lift"
           onPress={() => router.replace("/(tabs)")}
         >
           <Text className="text-lg font-black text-white">ホームへ戻る</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

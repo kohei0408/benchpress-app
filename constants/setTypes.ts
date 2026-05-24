@@ -1,10 +1,10 @@
 import type { SetRecord, SetType } from "@/types";
 
 export const SET_TYPE_LABELS: Record<SetType, string> = {
-  straight: "ストレート",
-  pyramid: "ピラミッド",
-  "reverse-pyramid": "逆ピラミッド",
-  "topset-backoff": "トップ+バックオフ",
+  straight: "ストレートセット",
+  pyramid: "ピラミッドセット",
+  "reverse-pyramid": "逆ピラミッドセット",
+  "topset-backoff": "トップセット + バックオフ",
   "five-by-five": "5x5",
 };
 

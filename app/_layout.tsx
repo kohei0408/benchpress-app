@@ -1,13 +1,7 @@
 import "@/global.css";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import {
-  ActivityIndicator,
-  SafeAreaView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, SafeAreaView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { DbContext } from "@/contexts/DbContext";
 import { useDbInit } from "@/hooks/useDbInit";
@@ -22,7 +16,7 @@ export default function RootLayout() {
         <Text className="mb-6 text-center text-sm text-steel">{error.message}</Text>
         <TouchableOpacity
           accessibilityRole="button"
-          className="rounded-lg bg-lift px-8 py-3"
+          className="min-h-12 rounded-lg bg-lift px-8 py-3"
           onPress={retry}
         >
           <Text className="font-bold text-white">再試行</Text>

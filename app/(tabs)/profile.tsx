@@ -1,7 +1,7 @@
 import { ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { screenFlex, scrollContent } from "@/constants/layout";
 import { MuscleMap } from "@/components/MuscleMap";
+import { screenFlex, scrollContent } from "@/constants/layout";
 import { useDb } from "@/contexts/DbContext";
 import { useFatigueStore } from "@/stores/fatigueStore";
 import { useSessionStore } from "@/stores/sessionStore";
@@ -32,20 +32,16 @@ export default function ProfileScreen() {
       soreMuscles: fatigue.soreMuscles,
       fatigueScore: calcFatigueScore(fatigue.sleepHours, fatigue.soreMuscles),
     };
-    try {
-      await saveLog(db, log);
-    } catch (err) {
-      console.error("Fatigue log save error:", err);
-    }
+    await saveLog(db, log);
   };
 
   return (
     <SafeAreaView className="flex-1 bg-panel" style={screenFlex} edges={["top"]}>
-      <ScrollView style={screenFlex} contentContainerStyle={scrollContent}>
+      <ScrollView style={screenFlex} contentContainerStyle={scrollContent} keyboardShouldPersistTaps="handled">
         <Text className="text-3xl font-black text-ink">プロフィール</Text>
         <View className="mt-5 rounded-lg bg-white p-4">
           <Text className="text-sm font-black text-ink">目標重量</Text>
-          <View className="mt-2 flex-row items-center rounded-lg bg-panel px-4 py-3">
+          <View className="mt-2 min-h-16 flex-row items-center rounded-lg bg-panel px-4 py-3">
             <TextInput
               className="flex-1 text-3xl font-black text-ink"
               keyboardType="numeric"
@@ -58,7 +54,7 @@ export default function ProfileScreen() {
 
         <View className="mt-4 rounded-lg bg-white p-4">
           <Text className="text-sm font-black text-ink">バー重量</Text>
-          <View className="mt-2 flex-row items-center rounded-lg bg-panel px-4 py-3">
+          <View className="mt-2 min-h-16 flex-row items-center rounded-lg bg-panel px-4 py-3">
             <TextInput
               className="flex-1 text-3xl font-black text-ink"
               keyboardType="numeric"
@@ -71,13 +67,13 @@ export default function ProfileScreen() {
 
         <View className="mt-4 rounded-lg bg-white p-4">
           <Text className="text-sm font-black text-ink">1RM 計算式</Text>
-          <View className="mt-3 flex-row gap-2">
-            {(["epley", "brzycki"] as OneRmFormula[]).map((formula) => (
+          <View className="mt-3 flex-row">
+            {(["epley", "brzycki"] as OneRmFormula[]).map((formula, index) => (
               <TouchableOpacity
                 accessibilityRole="button"
                 className={`h-11 flex-1 items-center justify-center rounded-lg ${
-                  profile.oneRmFormula === formula ? "bg-ink" : "bg-panel"
-                }`}
+                  index === 0 ? "mr-1" : "ml-1"
+                } ${profile.oneRmFormula === formula ? "bg-ink" : "bg-panel"}`}
                 key={formula}
                 onPress={() => updateProfile({ oneRmFormula: formula })}
               >
@@ -95,20 +91,20 @@ export default function ProfileScreen() {
 
         <View className="mt-4 rounded-lg bg-white p-4">
           <Text className="text-sm font-black text-ink">睡眠時間</Text>
-          <View className="mt-3 flex-row items-center gap-3">
+          <View className="mt-3 flex-row items-center">
             <TouchableOpacity
               accessibilityRole="button"
-              className="h-11 w-11 items-center justify-center rounded-lg bg-ink"
+              className="h-12 w-12 items-center justify-center rounded-lg bg-ink"
               onPress={() => setSleepHours(Math.max(0, fatigue.sleepHours - 0.5))}
             >
               <Text className="text-xl font-black text-white">-</Text>
             </TouchableOpacity>
-            <Text className="flex-1 text-center text-3xl font-black text-ink">
+            <Text className="mx-3 flex-1 text-center text-3xl font-black text-ink">
               {fatigue.sleepHours.toFixed(1)} h
             </Text>
             <TouchableOpacity
               accessibilityRole="button"
-              className="h-11 w-11 items-center justify-center rounded-lg bg-ink"
+              className="h-12 w-12 items-center justify-center rounded-lg bg-ink"
               onPress={() => setSleepHours(Math.min(12, fatigue.sleepHours + 0.5))}
             >
               <Text className="text-xl font-black text-white">+</Text>
