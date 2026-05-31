@@ -16,15 +16,18 @@ import type { WorkoutSession } from "@/types";
 
 function HistoryRow({ item }: { item: WorkoutSession }) {
   return (
-    <TouchableOpacity accessibilityRole="button" className="mb-2 min-h-16 rounded-lg bg-white px-4 py-3">
+    <TouchableOpacity
+      accessibilityRole="button"
+      className="mb-2 min-h-16 rounded-lg border border-white/10 bg-[#171a21] px-4 py-3"
+    >
       <View className="flex-row items-center justify-between">
         <View className="mr-3 flex-1">
-          <Text className="text-sm font-black text-ink">{SET_TYPE_LABELS[item.setType]}</Text>
-          <Text className="mt-1 text-xs text-steel">{new Date(item.date).toLocaleDateString("ja-JP")}</Text>
+          <Text className="text-sm font-black text-white">{SET_TYPE_LABELS[item.setType]}</Text>
+          <Text className="mt-1 text-xs text-white/45">{new Date(item.date).toLocaleDateString("ja-JP")}</Text>
         </View>
         <View className="items-end">
-          <Text className="text-base font-black text-ink">{item.estimated1RM.toFixed(1)} kg</Text>
-          <Text className="text-xs text-steel">VOL {totalVolume(item.sets).toLocaleString()} kg</Text>
+          <Text className="text-base font-black text-white">{item.estimated1RM.toFixed(1)} kg</Text>
+          <Text className="text-xs text-[#19a7a1]">VOL {totalVolume(item.sets).toLocaleString()} kg</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -41,11 +44,11 @@ export default function HomeScreen() {
   const ai = useAIRecommendation(sessions, fatigue);
 
   return (
-    <SafeAreaView className="flex-1 bg-panel" style={screenFlex} edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-[#0b0d10]" style={screenFlex} edges={["top"]}>
       <ScrollView style={screenFlex} contentContainerStyle={scrollContent}>
         <View className="mb-4">
-          <Text className="text-3xl font-black text-ink">BenchMax</Text>
-          <Text className="mt-1 text-sm font-semibold text-steel">ベンチプレス更新に全振り</Text>
+          <Text className="text-4xl font-black text-white">BenchMax</Text>
+          <Text className="mt-1 text-sm font-semibold text-white/50">ベンチプレス更新に全振り</Text>
         </View>
 
         <SuccessScoreRing
@@ -55,13 +58,13 @@ export default function HomeScreen() {
         />
 
         <View className="mt-4 flex-row">
-          <View className="mr-1 flex-1 rounded-lg bg-white p-3">
-            <Text className="text-xs font-bold text-steel">睡眠</Text>
-            <Text className="mt-1 text-xl font-black text-ink">{fatigue.sleepHours.toFixed(1)} h</Text>
+          <View className="mr-1 flex-1 rounded-lg border border-white/10 bg-[#171a21] p-4">
+            <Text className="text-xs font-bold text-white/45">睡眠</Text>
+            <Text className="mt-1 text-2xl font-black text-white">{fatigue.sleepHours.toFixed(1)} h</Text>
           </View>
-          <View className="ml-1 flex-1 rounded-lg bg-white p-3">
-            <Text className="text-xs font-bold text-steel">疲労</Text>
-            <Text className="mt-1 text-xl font-black text-ink">{fatigue.fatigueScore}/100</Text>
+          <View className="ml-1 flex-1 rounded-lg border border-white/10 bg-[#171a21] p-4">
+            <Text className="text-xs font-bold text-white/45">疲労</Text>
+            <Text className="mt-1 text-2xl font-black text-white">{fatigue.fatigueScore}/100</Text>
           </View>
         </View>
 
@@ -89,7 +92,7 @@ export default function HomeScreen() {
         </Link>
 
         <View className="mt-6">
-          <Text className="mb-3 text-lg font-black text-ink">直近5件</Text>
+          <Text className="mb-3 text-lg font-black text-white">直近5件</Text>
           {sessions.slice(0, 5).map((item) => (
             <HistoryRow item={item} key={item.id} />
           ))}
