@@ -52,9 +52,10 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
       return;
     }
     const previous = draft.sets[draft.sets.length - 1];
+    const first = draft.sets[0];
     const nextSet: SetRecord = {
       setNumber: draft.sets.length + 1,
-      weight: previous?.weight ?? 75,
+      weight: draft.setType === "straight" ? first?.weight ?? 75 : previous?.weight ?? 75,
       reps: previous?.reps ?? 5,
       rpe: previous?.rpe,
     };
@@ -98,13 +99,18 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
       return null;
     }
     const formula: OneRmFormula = get().profile.oneRmFormula;
+    const firstWeight = draft.sets[0]?.weight ?? 75;
+    const sets =
+      draft.setType === "straight"
+        ? draft.sets.map((setRecord) => ({ ...setRecord, weight: firstWeight }))
+        : draft.sets;
     const session: WorkoutSession = {
       id: `session-${Date.now()}`,
       date: new Date().toISOString(),
       setType: draft.setType,
-      sets: draft.sets,
-      estimated1RM: bestEstimatedOneRm(draft.sets, formula),
-      notes: `volume:${totalVolume(draft.sets)}`,
+      sets,
+      estimated1RM: bestEstimatedOneRm(sets, formula),
+      notes: `volume:${totalVolume(sets)}`,
     };
     set({ draft: null });
     return session;

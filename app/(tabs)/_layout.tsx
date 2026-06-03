@@ -2,7 +2,7 @@ import { Tabs } from "expo-router";
 import { Text } from "react-native";
 
 function TabIcon({ label, focused }: { label: string; focused: boolean }) {
-  return <Text className={`text-lg ${focused ? "text-lift" : "text-steel"}`}>{label}</Text>;
+  return <Text className={`text-lg ${focused ? "text-lift" : "text-white/55"}`}>{label}</Text>;
 }
 
 export default function TabsLayout() {
@@ -10,11 +10,12 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        sceneStyle: { flex: 1, backgroundColor: "#f6f7f9" },
-        tabBarActiveTintColor: "#e23d28",
-        tabBarInactiveTintColor: "#6b7280",
+        sceneStyle: { flex: 1, backgroundColor: "#eef7df" },
+        tabBarActiveTintColor: "#b7f34b",
+        tabBarInactiveTintColor: "#9aa694",
         tabBarStyle: {
-          borderTopColor: "#e5e7eb",
+          backgroundColor: "#070907",
+          borderTopColor: "#26301f",
           height: 88,
           paddingBottom: 24,
           paddingTop: 8,

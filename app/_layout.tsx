@@ -19,7 +19,7 @@ export default function RootLayout() {
           className="min-h-12 rounded-lg bg-lift px-8 py-3"
           onPress={retry}
         >
-          <Text className="font-bold text-white">再試行</Text>
+          <Text className="font-bold text-ink">再試行</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
@@ -28,7 +28,7 @@ export default function RootLayout() {
   if (!isReady) {
     return (
       <View className="flex-1 items-center justify-center bg-panel">
-        <ActivityIndicator size="large" color="#e23d28" />
+        <ActivityIndicator size="large" color="#070907" />
         <Text className="mt-4 text-base font-semibold text-steel">データを読み込み中...</Text>
       </View>
     );

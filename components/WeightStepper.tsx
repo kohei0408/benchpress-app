@@ -34,27 +34,27 @@ export function WeightStepper({ value, onChange }: WeightStepperProps) {
 
   return (
     <View>
-      <Text className="mb-2 text-xs font-bold text-white/45">重量</Text>
-      <View className="min-h-16 flex-row items-center rounded-lg bg-black/25 px-4 py-3">
+      <Text className="mb-2 text-xs font-bold text-lift">重量</Text>
+      <View className="min-h-16 flex-row items-center rounded-lg bg-white/5 px-4 py-3">
         <TextInput
           className="flex-1 text-center text-4xl font-black text-white"
           keyboardType="numeric"
           onChangeText={(text) => onChange(Number(text) || 20)}
           value={String(value)}
         />
-        <Text className="text-xl font-black text-white/50">kg</Text>
+        <Text className="text-xl font-black text-white/55">kg</Text>
       </View>
       <View className="mt-3 flex-row flex-wrap">
         {DELTAS.map((delta) => (
           <TouchableOpacity
             accessibilityRole="button"
-            className="mb-2 mr-2 h-12 min-w-[72px] flex-1 items-center justify-center rounded-lg bg-white/10"
+            className="mb-2 mr-2 h-12 min-w-[72px] flex-1 items-center justify-center rounded-lg bg-lift"
             key={delta}
             onLongPress={() => startRepeat(delta)}
             onPress={() => applyDelta(delta)}
             onPressOut={stopRepeat}
           >
-            <Text className="text-sm font-black text-white">
+            <Text className="text-sm font-black text-ink">
               {delta > 0 ? "+" : ""}
               {delta}
             </Text>

@@ -17,35 +17,35 @@ const MUSCLES: { id: MuscleGroup; label: string; d: string }[] = [
 
 export function MuscleMap({ selected, onToggle }: MuscleMapProps) {
   return (
-    <View className="rounded-lg bg-white p-4">
-      <Text className="text-base font-black text-ink">筋肉痛部位</Text>
-      <View className="mt-3 flex-row items-center gap-4">
-        <Svg width={170} height={210} viewBox="0 0 170 210">
+    <View className="rounded-lg border border-lift/20 bg-ink p-4">
+      <Text className="text-base font-black text-white">筋肉痛部位</Text>
+      <View className="mt-3 flex-row items-center">
+        <Svg width={160} height={200} viewBox="0 0 170 210">
           {MUSCLES.map((muscle) => (
             <Path
               d={muscle.d}
-              fill={selected.includes(muscle.id) ? "#e23d28" : "#d6dbe2"}
+              fill={selected.includes(muscle.id) ? "#b7f34b" : "#2d3329"}
               key={muscle.id}
               onPress={() => onToggle(muscle.id)}
-              stroke="#121417"
-              strokeOpacity={0.16}
+              stroke="#b7f34b"
+              strokeOpacity={0.35}
               strokeWidth={2}
             />
           ))}
         </Svg>
-        <View className="flex-1 gap-2">
+        <View className="ml-3 flex-1">
           {MUSCLES.map((muscle) => (
             <TouchableOpacity
               accessibilityRole="button"
-              className={`rounded-lg px-3 py-2 ${
-                selected.includes(muscle.id) ? "bg-lift" : "bg-panel"
+              className={`mb-2 rounded-lg px-3 py-2 ${
+                selected.includes(muscle.id) ? "bg-lift" : "bg-white/10"
               }`}
               key={muscle.id}
               onPress={() => onToggle(muscle.id)}
             >
               <Text
                 className={`text-sm font-bold ${
-                  selected.includes(muscle.id) ? "text-white" : "text-ink"
+                  selected.includes(muscle.id) ? "text-ink" : "text-white"
                 }`}
               >
                 {muscle.label}

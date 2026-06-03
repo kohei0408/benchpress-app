@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity } from "react-native";
 
 interface StagnationBadgeProps {
   message: string;
@@ -9,13 +9,11 @@ export function StagnationBadge({ message, onPress }: StagnationBadgeProps) {
   return (
     <TouchableOpacity
       accessibilityRole="button"
-      className="rounded-lg border border-lift/40 bg-[#2a1616] px-4 py-3"
+      className="rounded-lg border border-lift/30 bg-ink px-4 py-3"
       onPress={onPress}
     >
-      <View className="flex-row items-center justify-between">
-        <Text className="text-sm font-black text-[#ff7a64]">停滞検知</Text>
-      </View>
-      <Text className="mt-1 text-xs font-semibold leading-4 text-white/80">{message}</Text>
+      <Text className="text-sm font-black text-lift">停滞検知</Text>
+      <Text className="mt-1 text-xs leading-4 text-white/75">{message}</Text>
     </TouchableOpacity>
   );
 }

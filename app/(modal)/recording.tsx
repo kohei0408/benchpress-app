@@ -7,6 +7,8 @@ import { modalScrollContent, screenFlex } from "@/constants/layout";
 import { SET_TYPE_LABELS } from "@/constants/setTypes";
 import { useSessionStore } from "@/stores/sessionStore";
 
+const RPE_VALUES = [6, 7, 8, 9, 10] as const;
+
 export default function RecordingScreen() {
   const draft = useSessionStore((state) => state.draft);
   const profile = useSessionStore((state) => state.profile);
@@ -17,30 +19,33 @@ export default function RecordingScreen() {
 
   if (!draft) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-[#0b0d10] px-5" edges={["top", "bottom"]}>
-        <Text className="text-center text-lg font-black text-white">記録中のセットがありません</Text>
+      <SafeAreaView className="flex-1 items-center justify-center bg-panel px-5" edges={["top", "bottom"]}>
+        <Text className="text-center text-lg font-black text-ink">記録中のセットがありません</Text>
         <TouchableOpacity
           accessibilityRole="button"
           className="mt-5 min-h-12 rounded-lg bg-lift px-5 py-3"
           onPress={() => router.replace("/(modal)/set-select")}
         >
-          <Text className="font-black text-white">セットを選ぶ</Text>
+          <Text className="font-black text-ink">セットを選ぶ</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
   }
 
   const currentSet = draft.sets[draft.currentIndex] ?? draft.sets[0];
+  const firstSet = draft.sets[0];
   const previousSameType = sessions.find((session) => session.setType === draft.setType);
   const previousSet = previousSameType?.sets.find((set) => set.setNumber === currentSet.setNumber);
   const canGoNext = draft.currentIndex < draft.sets.length - 1;
+  const isStraightAutoWeight = draft.setType === "straight" && currentSet.setNumber > 1;
+  const activeWeight = draft.setType === "straight" ? firstSet.weight : currentSet.weight;
 
   const complete = () => {
     router.replace("/(modal)/result");
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#0b0d10]" edges={["top", "bottom"]}>
+    <SafeAreaView className="flex-1 bg-panel" edges={["top", "bottom"]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         className="flex-1"
@@ -54,33 +59,43 @@ export default function RecordingScreen() {
           <View className="mb-5 flex-row items-center justify-between">
             <TouchableOpacity
               accessibilityRole="button"
-              className="min-h-11 min-w-20 items-center justify-center rounded-lg bg-white/10 px-4"
+              className="min-h-11 min-w-20 items-center justify-center rounded-lg bg-ink px-4"
               onPress={() => router.back()}
             >
               <Text className="text-base font-black text-white">戻る</Text>
             </TouchableOpacity>
             <View className="ml-3 flex-1 items-end">
-              <Text className="text-sm font-bold text-lift">{SET_TYPE_LABELS[draft.setType]}</Text>
-              <Text className="text-2xl font-black text-white">
+              <Text className="text-sm font-bold text-steel">{SET_TYPE_LABELS[draft.setType]}</Text>
+              <Text className="text-2xl font-black text-ink">
                 {currentSet.setNumber} セット目 / {draft.sets.length}
               </Text>
             </View>
           </View>
 
-          <View className="rounded-lg border border-white/10 bg-[#171a21] p-4">
-            <WeightStepper
-              onChange={(weight) => updateDraftSet(currentSet.setNumber, { weight })}
-              value={currentSet.weight}
-            />
+          <View className="rounded-lg border border-lift/20 bg-ink p-4">
+            {isStraightAutoWeight ? (
+              <View>
+                <Text className="text-xs font-bold text-lift">重量</Text>
+                <Text className="mt-2 text-4xl font-black text-white">{firstSet.weight} kg</Text>
+                <Text className="mt-2 text-xs font-semibold text-white/55">
+                  ストレートセットのため1セット目の重量を適用します
+                </Text>
+              </View>
+            ) : (
+              <WeightStepper
+                onChange={(weight) => updateDraftSet(currentSet.setNumber, { weight })}
+                value={currentSet.weight}
+              />
+            )}
             {previousSet ? (
-              <Text className="mt-2 text-xs font-semibold text-white/45">
+              <Text className="mt-2 text-xs font-semibold text-white/55">
                 前回同一セット: {previousSet.weight} kg x {previousSet.reps}
               </Text>
             ) : null}
           </View>
 
-          <View className="mt-4 rounded-lg border border-white/10 bg-[#171a21] p-4">
-            <Text className="mb-3 text-xs font-bold text-white/45">回数</Text>
+          <View className="mt-4 rounded-lg border border-lift/20 bg-ink p-4">
+            <Text className="mb-3 text-xs font-bold text-lift">回数</Text>
             <View className="flex-row items-center">
               <TouchableOpacity
                 accessibilityRole="button"
@@ -95,16 +110,36 @@ export default function RecordingScreen() {
                 className="h-14 w-14 items-center justify-center rounded-lg bg-lift"
                 onPress={() => updateDraftSet(currentSet.setNumber, { reps: currentSet.reps + 1 })}
               >
-                <Text className="text-3xl font-black text-white">+</Text>
+                <Text className="text-3xl font-black text-ink">+</Text>
               </TouchableOpacity>
             </View>
           </View>
 
-          <View className="mt-4">
-            <PlateCalculator barWeight={profile.barWeight} totalWeight={currentSet.weight} />
+          <View className="mt-4 rounded-lg border border-lift/20 bg-ink p-4">
+            <Text className="text-xs font-bold text-lift">RPE</Text>
+            <View className="mt-3 flex-row">
+              {RPE_VALUES.map((rpe) => (
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  className={`mr-2 h-11 flex-1 items-center justify-center rounded-lg ${
+                    currentSet.rpe === rpe ? "bg-lift" : "bg-white/10"
+                  }`}
+                  key={rpe}
+                  onPress={() => updateDraftSet(currentSet.setNumber, { rpe })}
+                >
+                  <Text className={`font-black ${currentSet.rpe === rpe ? "text-ink" : "text-white"}`}>
+                    {rpe}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
 
-          <View className="mt-5 rounded-lg border border-white/10 bg-[#171a21] p-4">
+          <View className="mt-4">
+            <PlateCalculator barWeight={profile.barWeight} totalWeight={activeWeight} />
+          </View>
+
+          <View className="mt-5 rounded-lg border border-lift/20 bg-ink p-4">
             <Text className="text-sm font-black text-white">セット操作</Text>
             <View className="mt-3 flex-row">
               <TouchableOpacity
@@ -119,10 +154,10 @@ export default function RecordingScreen() {
               </TouchableOpacity>
               <TouchableOpacity
                 accessibilityRole="button"
-                className="ml-2 h-14 flex-1 items-center justify-center rounded-lg bg-[#19a7a1]"
+                className="ml-2 h-14 flex-1 items-center justify-center rounded-lg bg-lift"
                 onPress={addDraftSet}
               >
-                <Text className="text-base font-black text-white">セット追加</Text>
+                <Text className="text-base font-black text-ink">セット追加</Text>
               </TouchableOpacity>
             </View>
             <TouchableOpacity
@@ -130,7 +165,7 @@ export default function RecordingScreen() {
               className="mt-3 h-16 items-center justify-center rounded-lg bg-lift"
               onPress={complete}
             >
-              <Text className="text-lg font-black text-white">記録終了</Text>
+              <Text className="text-lg font-black text-ink">記録終了</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

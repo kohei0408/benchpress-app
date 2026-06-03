@@ -20,10 +20,10 @@ export default function SetSelectScreen() {
         <View className="mb-5 flex-row items-center justify-between">
           <TouchableOpacity
             accessibilityRole="button"
-            className="min-h-11 min-w-20 items-center justify-center rounded-lg bg-white px-4"
+            className="min-h-11 min-w-20 items-center justify-center rounded-lg bg-ink px-4"
             onPress={() => router.back()}
           >
-            <Text className="text-base font-black text-ink">戻る</Text>
+            <Text className="text-base font-black text-white">戻る</Text>
           </TouchableOpacity>
           <Text className="flex-1 text-right text-2xl font-black text-ink">セット構成</Text>
         </View>
@@ -32,12 +32,12 @@ export default function SetSelectScreen() {
           {SET_TYPE_OPTIONS.map((setType, index) => (
             <TouchableOpacity
               accessibilityRole="button"
-              className="mb-3 min-h-[76px] rounded-lg bg-white p-4"
+              className="mb-3 min-h-[76px] rounded-lg border border-lift/20 bg-ink p-4"
               key={setType}
               onPress={() => select(setType)}
             >
               <Text className="text-xs font-bold text-lift">0{index + 1}</Text>
-              <Text className="mt-2 text-xl font-black text-ink">{SET_TYPE_LABELS[setType]}</Text>
+              <Text className="mt-2 text-xl font-black text-white">{SET_TYPE_LABELS[setType]}</Text>
             </TouchableOpacity>
           ))}
         </View>

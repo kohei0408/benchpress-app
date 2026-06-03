@@ -2,79 +2,83 @@ import { useMemo } from "react";
 import { totalVolume } from "@/constants/formulas";
 import type { FatigueLog, SuccessScoreResult, WorkoutSession } from "@/types";
 
-const BASE_SCORE = 50;
-
 function clampScore(value: number) {
   return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function recentAverageRpe(sessions: WorkoutSession[]) {
+  const rpes = sessions
+    .slice(0, 3)
+    .flatMap((session) => session.sets.map((set) => set.rpe))
+    .filter((rpe): rpe is number => typeof rpe === "number");
+  if (rpes.length === 0) {
+    return null;
+  }
+  return rpes.reduce((sum, rpe) => sum + rpe, 0) / rpes.length;
 }
 
 export function useSuccessScore(
   sessions: WorkoutSession[],
   fatigue: FatigueLog,
   stagnationWeeks: number,
+  targetWeight: number,
 ): SuccessScoreResult {
   return useMemo(() => {
-    if (sessions.length === 0) {
-      return { score: BASE_SCORE, factors: [] };
-    }
+    const latest = sessions[0];
+    const latestOneRm = latest?.estimated1RM ?? 0;
+    const targetRatio = targetWeight > 0 && latestOneRm > 0 ? latestOneRm / targetWeight : 0.72;
+    const strengthBase = 35 + Math.min(35, targetRatio * 35);
 
-    const factors: SuccessScoreResult["factors"] = [];
-    let delta = 0;
-
-    const recentFour = sessions.slice(0, 4);
-    let oneRmImpact = 0;
-    if (recentFour.length >= 2) {
-      const newest = recentFour[0].estimated1RM;
-      const oldest = recentFour[recentFour.length - 1].estimated1RM;
-      if (newest > oldest) {
-        oneRmImpact = 20;
-      } else if (newest < oldest) {
-        oneRmImpact = -15;
-      }
+    let trendImpact = 0;
+    if (sessions.length >= 2) {
+      const newest = sessions[0].estimated1RM;
+      const previous = sessions[Math.min(3, sessions.length - 1)].estimated1RM;
+      const trendRate = previous > 0 ? (newest - previous) / previous : 0;
+      trendImpact = Math.max(-12, Math.min(14, trendRate * 180));
     }
-    factors.push({ label: "1RM伸び率", impact: oneRmImpact });
-    delta += oneRmImpact;
 
     let volumeImpact = 0;
-    if (sessions.length >= 2) {
-      const latestVolume = totalVolume(sessions[0].sets);
-      const previousVolume = totalVolume(sessions[1].sets);
-      if (latestVolume > previousVolume) {
-        volumeImpact = 10;
-      } else if (latestVolume < previousVolume) {
-        volumeImpact = -10;
-      }
+    if (sessions.length >= 4) {
+      const recentVolume = sessions.slice(0, 2).reduce((sum, session) => sum + totalVolume(session.sets), 0);
+      const previousVolume = sessions.slice(2, 4).reduce((sum, session) => sum + totalVolume(session.sets), 0);
+      const volumeRate = previousVolume > 0 ? (recentVolume - previousVolume) / previousVolume : 0;
+      volumeImpact = Math.max(-8, Math.min(8, volumeRate * 22));
+    } else if (sessions.length >= 2) {
+      const diff = totalVolume(sessions[0].sets) - totalVolume(sessions[1].sets);
+      volumeImpact = diff >= 0 ? 4 : -4;
     }
-    factors.push({ label: "ボリューム", impact: volumeImpact });
-    delta += volumeImpact;
 
-    let fatigueImpact = 0;
-    if (fatigue.fatigueScore <= 30) {
-      fatigueImpact = 15;
-    } else if (fatigue.fatigueScore >= 61) {
-      fatigueImpact = -15;
-    }
-    factors.push({ label: "疲労", impact: fatigueImpact });
-    delta += fatigueImpact;
+    const sleepImpact =
+      fatigue.sleepHours >= 8
+        ? 8
+        : fatigue.sleepHours >= 7
+          ? 5
+          : fatigue.sleepHours >= 6
+            ? -3
+            : -10;
+    const fatigueImpact = 12 - fatigue.fatigueScore * 0.32;
+    const stagnationImpact = -Math.min(14, stagnationWeeks * 6);
+    const avgRpe = recentAverageRpe(sessions);
+    const rpeImpact = avgRpe === null ? 0 : avgRpe >= 9 ? -8 : avgRpe >= 8 ? -3 : avgRpe <= 7 ? 4 : 0;
 
-    let sleepImpact = 0;
-    if (fatigue.sleepHours >= 7) {
-      sleepImpact = 10;
-    } else if (fatigue.sleepHours < 5) {
-      sleepImpact = -10;
-    }
-    factors.push({ label: "睡眠", impact: sleepImpact });
-    delta += sleepImpact;
+    const factors = [
+      { label: "推定1RM", impact: Math.round(strengthBase - 50) },
+      { label: "直近の記録", impact: Math.round(trendImpact) },
+      { label: "ボリューム", impact: Math.round(volumeImpact) },
+      { label: "疲労度", impact: Math.round(fatigueImpact) },
+      { label: "睡眠時間", impact: Math.round(sleepImpact) },
+      { label: "RPE", impact: Math.round(rpeImpact) },
+      { label: "停滞", impact: Math.round(stagnationImpact) },
+    ];
+    const score =
+      strengthBase +
+      trendImpact +
+      volumeImpact +
+      sleepImpact +
+      fatigueImpact +
+      stagnationImpact +
+      rpeImpact;
 
-    let stagnationImpact = 0;
-    if (stagnationWeeks >= 3) {
-      stagnationImpact = -20;
-    } else if (stagnationWeeks === 2) {
-      stagnationImpact = -10;
-    }
-    factors.push({ label: "停滞", impact: stagnationImpact });
-    delta += stagnationImpact;
-
-    return { score: clampScore(BASE_SCORE + delta), factors };
-  }, [fatigue, sessions, stagnationWeeks]);
+    return { score: clampScore(score), factors };
+  }, [fatigue, sessions, stagnationWeeks, targetWeight]);
 }

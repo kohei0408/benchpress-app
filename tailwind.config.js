@@ -5,11 +5,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        ink: "#121417",
-        steel: "#4b5563",
-        lift: "#e23d28",
-        recovery: "#2f855a",
-        panel: "#f6f7f9",
+        ink: "#070907",
+        steel: "#5f6b5d",
+        lift: "#b7f34b",
+        recovery: "#8fdc3f",
+        panel: "#eef7df",
       },
     },
   },
